@@ -1,0 +1,41 @@
+pipeline{
+
+    agent {
+        label 'NODEJS'
+    }
+
+    stages {
+
+        stage('Compile Code') {
+            steps {
+                sh '''
+                mvn compile
+               '''
+            }
+        }
+
+        stage('Make Package') {
+            steps {
+                sh '''
+                mvn package
+               '''
+            }
+        }
+        stage('prepare Artifacts') {
+            steps {
+                sh '''
+                  cp target/*.jar shipping.jar
+                  zip -r shipping.zip shipping.jar
+               '''
+            }
+
+        }
+        stage('upload Artifacts') {
+            steps {
+                sh '''
+           curl -f -v -u admin:DevOps321 --upload-file shipping.zip http://172.31.13.99:8081/repository/shipping/shipping.zip
+          '''
+            }
+        }
+    }
+}
